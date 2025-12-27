@@ -246,3 +246,43 @@ Process a sequence using a composable `<ranges>` pipeline with no explicit loops
 > `<ranges>` turns data flow into a readable, testable pipeline.  
 > Control logic disappears; intent becomes explicit.
 — `<ranges>` Transform + Filter Pipeline
+
+---
+
+## Kata 5 — Explicit State Machine (Flight Leg Lifecycle)
+
+**Topic:** Explicit state machines / `std::optional`  
+**Duration:** ~20 minutes  
+
+### Kata 5 Goal
+
+Model a small, explicit state machine for an aircraft flight leg with well-defined transitions.
+
+### Kata 5 Focus
+
+- Making state and transitions explicit
+- Rejecting invalid transitions deterministically
+- Avoiding implicit flags or ad-hoc conditionals
+- Using `std::optional` to represent invalid state changes
+
+### Kata 5 Key Mechanics
+
+- `State` and `Event` modeled as `enum class`
+- `transition(State, Event)` returns:
+  - `State` for valid transitions
+  - `std::nullopt` for invalid transitions
+- No side effects; pure transition function
+
+### Kata 5 Verification
+
+- Drive the valid “happy path” through all states:
+  `parked → taxi_out → takeoff → cruise → approach → landed → taxi_in → parked`
+- Assert invalid transitions return `std::nullopt`:
+  - `parked + touchdown`
+  - `cruise + rotate`
+  - `taxi_in + begin_approach`
+
+### Kata 5 Takeaway
+
+> Explicit state machines replace hidden assumptions with enforced rules.  
+> Invalid transitions become impossible to ignore.

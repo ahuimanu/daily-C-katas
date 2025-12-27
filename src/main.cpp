@@ -1,44 +1,90 @@
 #include <cassert>
-#include <iostream>
-#include <ranges>
-#include <vector>
+#include <optional>
 
 /*
-Given the input vector:
-std::vector<int> input{ -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+Implement a small explicit state machine for a flight leg lifecycle.
 
-Build a pipeline that:
+Single file main.cpp.
 
-Filters positive numbers (> 0)
-Squares each remaining value
-Takes the first 3 results
-Materialize the result into std::vector<int> output.
+Define:
+enum class State { parked, taxi_out, takeoff, cruise, approach, landed, taxi_in };
+enum class Event { start_taxi, rotate, climb, begin_approach, touchdown, exit_runway, park };
 
-Rules:
-Use <ranges> views only (views::filter, views::transform, views::take)
-No for, while, or algorithms like std::copy_if
-No lambdas capturing external state
+
+Implement:
+std::optional<State> transition(State s, Event e);
+
+Returns next state if the transition is valid, otherwise std::nullopt.
+Valid transitions only:
+parked + start_taxi → taxi_out
+taxi_out + rotate → takeoff
+takeoff + climb → cruise
+cruise + begin_approach → approach
+approach + touchdown → landed
+landed + exit_runway → taxi_in
+taxi_in + park → parked
 */
 
-std::vector<int> process_vector(const std::vector<int> &input)
+enum class State { parked, taxi_out, takeoff, cruise, approach, landed, taxi_in };
+enum class Event { start_taxi, rotate, climb, begin_approach, touchdown, exit_runway, park };
+
+std::optional<State> transition(State s, Event e);
+
+std::optional<State> transition(State s, Event e)
 {
-    namespace views = std::ranges::views;
-
-    auto pipeline = input | views::filter([](int n){ return n > 0; }) 
-                          | views::transform([](int n){ return n * n; }) 
-                          | views::take(3) 
-                          | views::common;
-
-    std::vector<int> output(std::ranges::begin(pipeline), std::ranges::end(pipeline));
-    return output;
+    switch (s)
+    {
+    case State::parked:
+        if (e == Event::start_taxi)
+            return State::taxi_out;
+        break;
+    case State::taxi_out:
+        if (e == Event::rotate)
+            return State::takeoff;
+        break;
+    case State::takeoff:
+        if (e == Event::climb)
+            return State::cruise;
+        break;
+    case State::cruise:
+        if (e == Event::begin_approach)
+            return State::approach;
+        break;
+    case State::approach:
+        if (e == Event::touchdown)
+            return State::landed;
+        break;
+    case State::landed:
+        if (e == Event::exit_runway)
+            return State::taxi_in;
+        break;
+    case State::taxi_in:
+        if (e == Event::park)
+            return State::parked;
+        break;
+    default:
+        break;
+    }
+    return std::nullopt;
 }
+
 
 int main()
 {
-    std::vector<int> input{-3, -2, -1, 0, 1, 2, 3, 4, 5};
-    const auto output = process_vector(input);
-    const auto validator = std::vector<int>{1, 4, 9};
-    assert(output == validator && "Output does not match expected values");
+
+    // Test valid transition
+    assert(transition(State::parked, Event::start_taxi) == State::taxi_out);
+    assert(transition(State::taxi_out, Event::rotate) == State::takeoff);
+    assert(transition(State::takeoff, Event::climb) == State::cruise);
+    assert(transition(State::cruise, Event::begin_approach) == State::approach);
+    assert(transition(State::approach, Event::touchdown) == State::landed);
+    assert(transition(State::landed, Event::exit_runway) == State::taxi_in);
+    assert(transition(State::taxi_in, Event::park) == State::parked);
+
+    // Test invalid transitions
+    assert(transition(State::parked, Event::touchdown) == std::nullopt);
+    assert(transition(State::cruise, Event::rotate) == std::nullopt);
+    assert(transition(State::taxi_in, Event::begin_approach) == std::nullopt);
 
     return 0;
 }
