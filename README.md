@@ -300,21 +300,24 @@ Model a small, explicit state machine for an aircraft flight leg with well-defin
 
 ### Kata 6 Goal
 
-Use `std::optional` deliberately at a system boundary to represent “may not exist” without exceptions or sentinel values.
+Use [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional) deliberately at a system boundary to represent "may not exist" without exceptions or sentinel values.
 
 ### Kata 6 Focus
 
-- Treating `std::optional` as a *boundary contract*, not an internal crutch
+- Treating [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional) as a *boundary contract*, not an internal crutch
 - Making absence explicit to the caller
 - Forcing call sites to acknowledge missing data
+- Using [`std::from_chars`](https://en.cppreference.com/w/cpp/utility/from_chars) for exception-free parsing
 
 ### Kata 6 Key Mechanics
 
-- Functions return `std::optional<T>` instead of:
+- Functions return [`std::optional<T>`](https://en.cppreference.com/w/cpp/utility/optional) instead of:
   - magic values
   - out-parameters
   - exceptions
-- Callers must branch explicitly on presence vs absence
+- Callers must branch explicitly on presence vs absence using [`.has_value()`](https://en.cppreference.com/w/cpp/utility/optional/has_value) or [the arrow operator](https://en.cppreference.com/w/cpp/utility/optional/operator*)
+- No default construction of "invalid" objects
+- Strict input validation with [`std::isdigit`](https://en.cppreference.com/w/cpp/string/byte/isdigit) and [`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view)s absence
 - No default construction of “invalid” objects
 
 ### Kata 6 Why this matters
@@ -329,3 +332,43 @@ In native plugins and systems code:
 
 > `std::optional` is a boundary signal.  
 > If absence matters, encode it in the type system.
+
+---
+
+## Kata 7 — Value Semantics vs Reference Semantics
+
+**Topic:** Ownership and data flow  
+**Duration:** ~25 minutes  
+
+### Kata 7 Goal
+
+Contrast value semantics and reference semantics to understand when copying is *correct* and when sharing is *dangerous*.
+
+### Kata 7 Focus
+
+- Understanding when objects should be:
+  - copied
+  - moved
+  - referenced
+- Avoiding accidental shared state
+- Designing APIs that make ownership obvious
+
+### Kata 7 Key Mechanics
+
+- Pass small, self-contained objects by value
+- Move ownership explicitly when transferring responsibility
+- Use references only when lifetime is guaranteed externally
+- Observe how changes propagate (or don’t) across copies
+
+### Kata 7 Why this matters
+
+In plugin and real-time systems:
+
+- accidental sharing causes subtle bugs
+- unclear ownership causes leaks and double-frees
+- value semantics enable safer composition and testing
+
+### Kata 7 Takeaway
+
+> Prefer values by default.  
+> Use references only when you can *prove* the lifetime.
