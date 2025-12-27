@@ -1,37 +1,118 @@
 {
     "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 23, "patch": 0 },
     "configurePresets": [
         {
-            "name": "msvc-ninja-debug",
-            "displayName": "MSVC + Ninja (Debug)",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-ninja-debug",
+            "name": "base",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_STANDARD": "23"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },
         {
-            "name": "msvc-ninja-release",
-            "displayName": "MSVC + Ninja (Release)",
+            "name": "debug",
+            "displayName": "Ninja (Debug)",
+            "inherits": "base",
+            "condition": {
+                "type": "anyOf",
+                "conditions": [
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+                ]
+            },
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-ninja-release",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+        },
+        {
+            "name": "release",
+            "displayName": "Ninja (Release)",
+            "inherits": "base",
+            "condition": {
+                "type": "anyOf",
+                "conditions": [
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+                ]
+            },
+            "generator": "Ninja",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+        },
+        {
+            "name": "debug-apple-llvm",
+            "displayName": "Ninja (Debug, Apple LLVM)",
+            "inherits": "base",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
+            }
+        },
+        {
+            "name": "release-apple-llvm",
+            "displayName": "Ninja (Release, Apple LLVM)",
+            "inherits": "base",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_STANDARD": "23"
+                "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
             }
         }
     ],
     "buildPresets": [
         {
             "name": "debug",
-            "configurePreset": "msvc-ninja-debug",
-            "configuration": "Debug"
+            "displayName": "Debug",
+            "configurePreset": "debug",
+            "condition": {
+                "type": "anyOf",
+                "conditions": [
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+                ]
+            }
         },
         {
             "name": "release",
-            "configurePreset": "msvc-ninja-release",
-            "configuration": "Release"
+            "displayName": "Release",
+            "configurePreset": "release",
+            "condition": {
+                "type": "anyOf",
+                "conditions": [
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+                    { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+                ]
+            }
+        },
+        {
+            "name": "debug-apple-llvm",
+            "displayName": "Debug (Apple LLVM)",
+            "configurePreset": "debug-apple-llvm",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
+        },
+        {
+            "name": "release-apple-llvm",
+            "displayName": "Release (Apple LLVM)",
+            "configurePreset": "release-apple-llvm",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
         }
     ]
 }
