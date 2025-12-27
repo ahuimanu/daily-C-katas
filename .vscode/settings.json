@@ -1,4 +1,14 @@
 {
-    "cmake.useCMakePresets": "always",
-    "cmake.configureOnOpen": true
+    "cmake.useCMakePresets": "never",
+    "cmake.configureOnOpen": true,
+    "terminal.integrated.profiles.windows": {
+        "Developer Command Prompt": {
+            "path": "cmd.exe",
+            "args": [
+                "/k",
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\LaunchDevCmd.bat"
+            ],
+            "icon": "tools"
+        }
+    }
 }

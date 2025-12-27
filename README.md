@@ -110,8 +110,9 @@ Implement a minimal RAII wrapper that guarantees a `FILE*` is closed exactly onc
 
 - Resource acquired in constructor
 - Resource released in destructor
-- Move constructor transfers ownership and nulls the source
-- Move assignment closes existing resource before taking ownership
+- [Move constructor](https://en.cppreference.com/w/cpp/language/move_constructor) transfers ownership and nulls the source
+- [Move assignment](https://en.cppreference.com/w/cpp/language/move_assignment) closes existing resource before taking ownership
+- [deleted copy constructor](https://en.cppreference.com/w/cpp/language/function#Deleted_functions) and assignment (`= delete`)
 
 ### Verification
 
@@ -131,19 +132,19 @@ Implement a minimal RAII wrapper that guarantees a `FILE*` is closed exactly onc
 
 ## Kata 2 — Strict Integer Parsing with `std::optional`
 
-**Topic:** `std::optional` / explicit failure  
+**Topic:** [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional) / explicit failure  
 **Duration:** ~20 minutes  
 
 ### Kata 2 Goal
 
-Parse a strictly formatted integer without exceptions, using `std::optional` to signal failure.
+Parse a strictly formatted integer without exceptions, using [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional) to signal failure.
 
 ### Kata 2 Focus
 
 - Representing failure explicitly
 - Rejecting malformed input early
 - Avoiding exceptions and locale-dependent parsing
-- Boundary-safe numeric conversion
+- Boundary-safe numeric conversion with [`std::from_chars`](https://en.cppreference.com/w/cpp/utility/from_chars)
 
 ### Kata 2 Key Mechanics
 
@@ -153,6 +154,7 @@ Parse a strictly formatted integer without exceptions, using `std::optional` to 
 - All remaining characters must be digits
 - Detect overflow / underflow for `int`
 - Require full consumption of input
+- Use [`std::from_chars`](https://en.cppreference.com/w/cpp/utility/from_chars) for exception-free parsing
 
 ### Kata 2 Verification
 
@@ -169,7 +171,7 @@ Parse a strictly formatted integer without exceptions, using `std::optional` to 
 
 ## Kata 3 — Lock-Free SPSC Ring Buffer
 
-**Topic:** Lock-free data structures / atomics  
+[`std::atomic`](https://en.cppreference.com/w/cpp/atomic/atomic)  
 **Duration:** ~30 minutes  
 
 ### Kata 3 Goal
@@ -178,8 +180,8 @@ Implement a single-producer / single-consumer (SPSC) ring buffer with no locks a
 
 ### Kata 3 Focus
 
-- Lock-free coordination using atomics
-- Correct memory ordering (`acquire` / `release`)
+- Lock-free coordination using [`std::atomic`](https://en.cppreference.com/w/cpp/atomic/atomic)
+- Correct [memory ordering](https://en.cppreference.com/w/cpp/atomic/memory_order) (`acquire` / `release`)
 - Distinguishing full vs empty without extra flags
 - FIFO correctness under wraparound
 
@@ -188,10 +190,11 @@ Implement a single-producer / single-consumer (SPSC) ring buffer with no locks a
 - One slot is always unused to distinguish full from empty
 - Producer owns `head`, consumer owns `tail`
 - `push`:
-  - Loads `tail` with `acquire`
-  - Stores new `head` with `release`
+  - Loads `tail` with [`memory_order_acquire`](https://en.cppreference.com/w/cpp/atomic/memory_order)
+  - Stores new `head` with [`memory_order_release`](https://en.cppreference.com/w/cpp/atomic/memory_order)
 - `pop`:
-  - Loads `head` with `acquire`
+  - Loads `head` with [`memory_order_acquire`](https://en.cppreference.com/w/cpp/atomic/memory_order)
+  - Stores new `tail` with [`memory_order_release`](https://en.cppreference.com/w/cpp/atomic/memory_order)
   - Stores new `tail` with `release`
 - No locks, no condition variables, no resizing
 
@@ -214,12 +217,12 @@ Implement a single-producer / single-consumer (SPSC) ring buffer with no locks a
 
 ## Kata 4 — `<ranges>` Transform + Filter Pipeline
 
-**Topic:** `<ranges>` / declarative data pipelines  
+[`<ranges>`](https://en.cppreference.com/w/cpp/ranges) / declarative data pipelines  
 **Duration:** ~20 minutes  
 
 ### Kata 4 Goal
 
-Process a sequence using a composable `<ranges>` pipeline with no explicit loops.
+Process a sequence using a composable [`<ranges>`](https://en.cppreference.com/w/cpp/ranges) pipeline with no explicit loops.
 
 ### Kata 4 Focus
 
@@ -230,8 +233,9 @@ Process a sequence using a composable `<ranges>` pipeline with no explicit loops
 
 ### Kata 4 Key Mechanics
 
-- `views::filter` to select values (`> 0`)
-- `views::transform` to map values (square)
+- [`views::filter`](https://en.cppreference.com/w/cpp/ranges/filter_view) to select values (`> 0`)
+- [`views::transform`](https://en.cppreference.com/w/cpp/ranges/transform_view) to map values (square)
+- [`views::take`](https://en.cppreference.com/w/cpp/ranges/take_view)form` to map values (square)
 - `views::take` to limit results
 - Lazy evaluation until materialized into a container
 
@@ -251,7 +255,7 @@ Process a sequence using a composable `<ranges>` pipeline with no explicit loops
 
 ## Kata 5 — Explicit State Machine (Flight Leg Lifecycle)
 
-**Topic:** Explicit state machines / `std::optional`  
+**Topic:** Explicit state machines / [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional)  
 **Duration:** ~20 minutes  
 
 ### Kata 5 Goal
@@ -263,14 +267,14 @@ Model a small, explicit state machine for an aircraft flight leg with well-defin
 - Making state and transitions explicit
 - Rejecting invalid transitions deterministically
 - Avoiding implicit flags or ad-hoc conditionals
-- Using `std::optional` to represent invalid state changes
+- Using [`std::optional`](https://en.cppreference.com/w/cpp/utility/optional) to represent invalid state changes
 
 ### Kata 5 Key Mechanics
 
-- `State` and `Event` modeled as `enum class`
+- [`enum class`](https://en.cppreference.com/w/cpp/language/enum) for `State` and `Event`
 - `transition(State, Event)` returns:
   - `State` for valid transitions
-  - `std::nullopt` for invalid transitions
+  - [`std::nullopt`](https://en.cppreference.com/w/cpp/utility/optional/nullopt) for invalid transitions
 - No side effects; pure transition function
 
 ### Kata 5 Verification
@@ -286,3 +290,42 @@ Model a small, explicit state machine for an aircraft flight leg with well-defin
 
 > Explicit state machines replace hidden assumptions with enforced rules.  
 > Invalid transitions become impossible to ignore.
+
+---
+
+## Kata 6 — `std::optional` as a Boundary Type
+
+**Topic:** API boundaries / explicit absence  
+**Duration:** ~20 minutes  
+
+### Kata 6 Goal
+
+Use `std::optional` deliberately at a system boundary to represent “may not exist” without exceptions or sentinel values.
+
+### Kata 6 Focus
+
+- Treating `std::optional` as a *boundary contract*, not an internal crutch
+- Making absence explicit to the caller
+- Forcing call sites to acknowledge missing data
+
+### Kata 6 Key Mechanics
+
+- Functions return `std::optional<T>` instead of:
+  - magic values
+  - out-parameters
+  - exceptions
+- Callers must branch explicitly on presence vs absence
+- No default construction of “invalid” objects
+
+### Kata 6 Why this matters
+
+In native plugins and systems code:
+
+- failures are expected
+- exceptions are often forbidden across boundaries
+- implicit assumptions lead to crashes
+
+### Kata 6 Takeaway
+
+> `std::optional` is a boundary signal.  
+> If absence matters, encode it in the type system.

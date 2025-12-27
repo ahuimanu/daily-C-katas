@@ -2,6 +2,16 @@
 #include <cstdio>
 #include <cassert>
 
+/*
+RAII: Resource Acquisition Is Initialization
+https://en.cppreference.com/w/cpp/language/raii
+
+Key Concepts:
+- Move Constructor: https://en.cppreference.com/w/cpp/language/move_constructor
+- Move Assignment: https://en.cppreference.com/w/cpp/language/move_assignment
+- Deleted Functions (= delete): https://en.cppreference.com/w/cpp/language/function#Deleted_functions
+*/
+
 class FileGuard
 {
 public:
@@ -96,9 +106,8 @@ int main()
                   << std::endl;
 
         FileGuard again("example.txt", "a");
-        assert(again && "Failed to open file again");        
+        assert(again && "Failed to open file again");
         std::fputs("Second write after close\n", again.get());
-
     }
 
     return 0;

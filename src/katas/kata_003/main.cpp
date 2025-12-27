@@ -3,8 +3,17 @@
 #include <vector>
 
 /*
-Given the input vector:
-std::vector<int> input{ -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+C++20 Ranges Library: https://en.cppreference.com/w/cpp/ranges
+
+Key Views:
+- views::filter: https://en.cppreference.com/w/cpp/ranges/filter_view
+- views::transform: https://en.cppreference.com/w/cpp/ranges/transform_view
+- views::take: https://en.cppreference.com/w/cpp/ranges/take_view
+- views::common: https://en.cppreference.com/w/cpp/ranges/common_view
+
+Motivation: Declarative, lazy data pipelines with no explicit loops.
+*/
+std::vector<int> input{-3, -2, -1, 0, 1, 2, 3, 4, 5};
 
 Build a pipeline that:
 

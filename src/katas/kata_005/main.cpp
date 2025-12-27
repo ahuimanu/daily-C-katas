@@ -2,31 +2,55 @@
 #include <optional>
 
 /*
-Implement a small explicit state machine for a flight leg lifecycle.
+std::optional: https://en.cppreference.com/w/cpp/utility/optional
+std::nullopt: https://en.cppreference.com/w/cpp/utility/optional/nullopt
+enum class: https://en.cppreference.com/w/cpp/language/enum
+
+Motivation: Explicit state transitions with no implicit assumptions.
+Invalid transitions return std::nullopt instead of exceptions or sentinels.
+*/
 
 Single file main.cpp.
 
-Define:
-enum class State { parked, taxi_out, takeoff, cruise, approach, landed, taxi_in };
-enum class Event { start_taxi, rotate, climb, begin_approach, touchdown, exit_runway, park };
+    Define : enum class State { parked,
+                                taxi_out,
+                                takeoff,
+                                cruise,
+                                approach,
+                                landed,
+                                taxi_in };
+enum class Event
+{
+    start_taxi,
+    rotate,
+    climb,
+    begin_approach,
+    touchdown,
+    exit_runway,
+    park
+};
 
+Implement : std::optional<State> transition(State s, Event e);
 
-Implement:
-std::optional<State> transition(State s, Event e);
+Returns next state if the transition is valid, otherwise std::nullopt.Valid transitions only : parked + start_taxi → taxi_out taxi_out + rotate → takeoff takeoff + climb → cruise cruise + begin_approach → approach approach + touchdown → landed landed + exit_runway → taxi_in taxi_in + park → parked * /
 
-Returns next state if the transition is valid, otherwise std::nullopt.
-Valid transitions only:
-parked + start_taxi → taxi_out
-taxi_out + rotate → takeoff
-takeoff + climb → cruise
-cruise + begin_approach → approach
-approach + touchdown → landed
-landed + exit_runway → taxi_in
-taxi_in + park → parked
-*/
-
-enum class State { parked, taxi_out, takeoff, cruise, approach, landed, taxi_in };
-enum class Event { start_taxi, rotate, climb, begin_approach, touchdown, exit_runway, park };
+                                                                                                                                                                                                                                                                                                 enum class State { parked,
+                                                                                                                                                                                                                                                                                                                    taxi_out,
+                                                                                                                                                                                                                                                                                                                    takeoff,
+                                                                                                                                                                                                                                                                                                                    cruise,
+                                                                                                                                                                                                                                                                                                                    approach,
+                                                                                                                                                                                                                                                                                                                    landed,
+                                                                                                                                                                                                                                                                                                                    taxi_in };
+enum class Event
+{
+    start_taxi,
+    rotate,
+    climb,
+    begin_approach,
+    touchdown,
+    exit_runway,
+    park
+};
 
 std::optional<State> transition(State s, Event e);
 
@@ -67,7 +91,6 @@ std::optional<State> transition(State s, Event e)
     }
     return std::nullopt;
 }
-
 
 int main()
 {

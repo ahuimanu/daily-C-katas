@@ -6,6 +6,13 @@
 #include <optional>
 #include <string_view>
 
+/*
+std::optional: https://en.cppreference.com/w/cpp/utility/optional
+std::from_chars: https://en.cppreference.com/w/cpp/utility/from_chars
+std::string_view: https://en.cppreference.com/w/cpp/string/basic_string_view
+std::nullopt: https://en.cppreference.com/w/cpp/utility/optional/nullopt
+*/
+
 std::optional<int> parse_int_strict(std::string_view str);
 
 std::optional<int> parse_int_strict(std::string_view str)
@@ -49,7 +56,7 @@ std::optional<int> parse_int_strict(std::string_view str)
 int main()
 {
 
-    //test assertions
+    // test assertions
 
     // no blanks
     assert(parse_int_strict("") == std::nullopt);
@@ -57,7 +64,7 @@ int main()
     // 123 is as expected
     assert(parse_int_strict("123") == 123);
 
-    //negative number
+    // negative number
     assert(parse_int_strict("-7") == -7);
 
     // leading space
@@ -82,6 +89,6 @@ int main()
     assert(parse_int_strict("-2147483649") == std::nullopt);
 
     std::cout << "All tests passed!\n";
-    
+
     return 0;
 }
