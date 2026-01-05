@@ -2,128 +2,152 @@
 #include <array>
 #include <span>
 #include <cassert>
+#include <functional>
+#include <utility>
 
 /*
 Task
 
-Normalize an array of floats in-place using std::span (no copies).
+Implement a tiny Resource Acquisition Is Initialization (RAII) scope-exit guard (defer) that runs a callable exactly once when the scope ends.
 
 Requirements
-
 Single file main.cpp.
 
 Implement:
 
-// Returns false if input is empty or max == min (cannot normalize)
-bool normalize_0_1(std::span<float> xs);
+class Defer {
+public:
+  template<class F>
+  explicit Defer(F&& f);
+
+  ~Defer();
+
+  Defer(const Defer&) = delete;
+  Defer& operator=(const Defer&) = delete;
+
+  Defer(Defer&& other) noexcept;
+  Defer& operator=(Defer&& other) noexcept;
+
+  void dismiss() noexcept;   // prevents execution
+};
 
 
 Rules:
 
-If xs.empty() → return false
-Compute min and max of the span
-If max == min → return false
-Otherwise, transform each element in-place:
+Runs the stored callable in the destructor if not dismissed.
+Move transfers responsibility; moved-from does nothing.
+Callable must be invoked at most once.
+No dynamic allocation in your code (standard library may allocate internally if you choose to use type-erasure, but aim to avoid it).
 
-x = (x - min) / (max - min)
+In main() use assert to verify:
 
-No allocations.
+Basic execution on scope exit:
+A counter increments once.
 
-In main():
+dismiss() prevents execution.
 
-Test 1:
+Move behavior:
 
-std::array<float, 5> a{ 10.f, 20.f, 15.f, 20.f, 10.f };
-
-
-normalize_0_1(a) returns true
-
-Assert results are exactly:
-
-10 → 0
-20 → 1
-15 → 0.5
-
-Test 2: all-equal input returns false:
-
-std::array<float, 3> b{ 2.f, 2.f, 2.f };
-
-Test 3: empty span returns false:
-
-std::span<float> empty{};
-
-Use assert only (no logging).
+Moving a Defer into an inner scope results in exactly one execution total (not zero, not two).
 
 Constraints
 
 C++23
-Use std::span
 No frameworks
-No extra helpers beyond standard headers
+No logging
+Use assert only
 
 */
 
-bool normalize_0_1(std::span<float> xs)
+class Defer {
+public:
+    template<class F>
+    explicit Defer(F&& f);
+
+    ~Defer() noexcept;
+
+    Defer(const Defer&) = delete;
+    Defer& operator=(const Defer&) = delete;
+    
+    Defer(Defer&& other) noexcept;
+    Defer& operator=(Defer&& other) noexcept;
+
+    void dismiss() noexcept;   // prevents execution
+
+private:
+    std::move_only_function<void()> fn_{};
+    bool active_{false};
+};
+
+template<class F>
+Defer::Defer(F&& f)
+    : fn_(std::forward<F>(f))
+    , active_(true)
 {
-    // Returns false if input is empty or max == min
-    if (xs.empty())
-        return false;
-
-    float min = xs[0];
-    float max = xs[0];
-
-    // Find min and max    
-    for (float x : xs)
-    {
-        if (x < min)
-            min = x;
-        if (x > max)
-            max = x;
-    }
-
-    // Check if max equals min
-    if (max == min)
-        return false;
-
-    float range = max - min;
-
-    // Normalize in-place
-    for (float& x : xs)
-    {
-        x = (x - min) / range;
-    }
-
-    return true;
 }
 
+Defer::~Defer() noexcept
+{
+    if (active_ && fn_) {
+        fn_();
+    }
+}
+
+Defer::Defer(Defer&& other) noexcept
+    : fn_(std::move(other.fn_))
+    , active_(other.active_)
+{
+    other.active_ = false;
+}
+
+Defer& Defer::operator=(Defer&& other) noexcept
+{
+    if (this == &other) {
+        return *this;
+    }
+
+    if (active_ && fn_) {
+        fn_();
+    }
+
+    fn_ = std::move(other.fn_);
+    active_ = other.active_;
+    other.active_ = false;
+
+    return *this;
+}
+
+void Defer::dismiss() noexcept
+{
+    active_ = false;
+}
 
 int main()
 {
-    // Test 1
+    // Basic execution on scope exit
+    int counter = 0;
     {
-        std::array<float, 5> arr{ 10.f, 20.f, 15.f, 20.f, 10.f };
-        bool result = normalize_0_1(arr);
-        assert(result == true);
-        assert(arr[0] == 0.f);
-        assert(arr[1] == 1.f);
-        assert(arr[2] == 0.5f);
-        assert(arr[3] == 1.f);
-        assert(arr[4] == 0.f);
+        Defer d([&] { ++counter; });
     }
+    assert(counter == 1);
 
-    // Test 2: all-equal input returns false
+    // dismiss() prevents execution
+    counter = 0;
     {
-        std::array<float, 3> arr2{ 2.f, 2.f, 2.f };
-        bool result = normalize_0_1(arr2);
-        assert(result == false);
+        Defer d([&] { ++counter; });
+        d.dismiss();
     }
+    assert(counter == 0);
 
-    // Test 3: empty span returns false
+    // Move behavior: exactly one execution total
+    counter = 0;
     {
-        std::span<float> empty{};
-        bool result = normalize_0_1(empty);
-        assert(result == false);
+        Defer outer([&] { ++counter; });
+        {
+            Defer inner(std::move(outer));
+        }
     }
+    assert(counter == 1);
 
     return 0;
 }
