@@ -7,3 +7,8 @@ set_target_properties(daily_kata PROPERTIES
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )
+
+# MSVC requires /std:c++latest for C++23 features
+if (MSVC)
+    target_compile_options(daily_kata PRIVATE /std:c++latest)
+endif()

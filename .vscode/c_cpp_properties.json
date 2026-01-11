@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "windows-llvm",
+            "includePath": ["${workspaceFolder}/**"],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "compilerPath": "clang.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "windows-clang-x64",
+            "compilerArgs": ["-std=c++23"],
+            "browse": {
+                "path": ["${workspaceFolder}/**"],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}

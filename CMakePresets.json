@@ -13,7 +13,8 @@
             "binaryDir": "${sourceDir}/build/msvc-ninja-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_STANDARD": "23"
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe"
             }
         },
         {
@@ -28,7 +29,8 @@
             "binaryDir": "${sourceDir}/build/msvc-ninja-release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_STANDARD": "23"
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe"
             }
         },
         {
@@ -56,34 +58,32 @@
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
             },
-            "generatomsvc-debug",
-            "configurePreset": "msvc-ninja-debug",
-            "configuration": "Debug"
-        },
-        {
-            "name": "msvc-release",
-            "configurePreset": "msvc-ninja-release",
-            "configuration": "Release"
-        },
-        {
-            "name": "win-llvm-debug",
-            "configurePreset": "win-llvm-debug",
-            "configuration": "Debug"
-        },
-        {
-            "name": "win-llvm-release",
-            "configurePreset": "win-llvm-release",
-            "configuration": "Release"
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/win-llvm-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_C_COMPILER": "C:/Program Files/LLVM/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/LLVM/bin/clang++.exe"
+            }
         },
         {
             "name": "mac-llvm-debug",
-            "configurePreset": "mac-llvm-debug",
-            "configuration": "Debug"
+            "displayName": "macOS LLVM + Ninja (Debug)",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/mac-llvm-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
+            }
         },
         {
-            "name": "mac-llvm-release",
-            "configurePreset": "mac-llvm-release",
-            "configuration": "Release"
             "name": "mac-llvm-release",
             "displayName": "macOS LLVM + Ninja (Release)",
             "condition": {
@@ -112,22 +112,24 @@
             "configuration": "Release"
         },
         {
+            "name": "debug-llvm",
+            "configurePreset": "win-llvm-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "release-llvm",
+            "configurePreset": "win-llvm-release",
+            "configuration": "Release"
+        },
+        {
             "name": "debug-apple-llvm",
-            "configurePreset": "debug-apple-llvm",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            }
+            "configurePreset": "mac-llvm-debug",
+            "configuration": "Debug"
         },
         {
             "name": "release-apple-llvm",
-            "configurePreset": "release-apple-llvm",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            }
+            "configurePreset": "mac-llvm-release",
+            "configuration": "Release"
         }
     ]
 }
